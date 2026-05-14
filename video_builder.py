@@ -903,16 +903,8 @@ def _fetch_youtube_cc_clips(keywords: list, n: int, seen_ids: set) -> list[str]:
 
         except subprocess.TimeoutExpired:
             print(f"[video_builder] YouTube CC timeout: '{query}'")
-            try:
-                os.unlink(tmp.name)
-            except OSError:
-                pass
         except Exception as e:
             print(f"[video_builder] YouTube CC hata ({query}): {e}")
-            try:
-                os.unlink(tmp.name)
-            except OSError:
-                pass
 
     return downloaded
 
@@ -1332,14 +1324,45 @@ def _fetch_archive_clips(keywords: list, n: int, seen_ids: set) -> list:
     return downloaded
 
 
+_STOCK_STOP = frozenset({
+    "footage", "video", "clip", "operations", "scene",
+    "2024", "2025", "2026", "2027", "latest", "breaking",
+})
+
+
+def _to_stock_query(kw: str, max_words: int = 3) -> str:
+    """Convert a specific CC/military query to a shorter stock-API-friendly query.
+
+    'IDF Merkava tank Gaza ground operation footage' → 'idf merkava tank'
+    'Iron Dome intercept Hamas rocket footage'       → 'iron dome intercept'
+    """
+    import re as _re
+    words = _re.split(r"[^a-zA-Z0-9]+", kw.lower())
+    filtered = [w for w in words if len(w) > 1 and w not in _STOCK_STOP]
+    return " ".join(filtered[:max_words]).strip()
+
+
+def _stock_queries(keywords: list, n: int = 4) -> list[str]:
+    """Return simplified, deduplicated queries for Pexels/Pixabay."""
+    seen: set[str] = set()
+    result: list[str] = []
+    for kw in keywords:
+        q = _to_stock_query(kw)
+        if q and q not in seen:
+            seen.add(q)
+            result.append(q)
+        if len(result) >= n:
+            break
+    return result or (keywords[:n] if keywords else [])
+
+
 def _fetch_pexels_clips(keywords: list, n: int, seen_ids: set) -> list[str]:
     """Pexels'ten ücretsiz stock video indirir."""
     api_key = os.environ.get("PEXELS_API_KEY", "")
     if not api_key:
         return []
     downloaded = []
-    # Sadece gerçek keyword'ler — generic fallback sorgular kaldırıldı
-    queries = keywords[:4]
+    queries = _stock_queries(keywords, n=6)
     if not queries:
         return []
     random.shuffle(queries)
@@ -1399,8 +1422,7 @@ def _fetch_pixabay_clips(keywords: list, n: int, seen_ids: set) -> list[str]:
     if not api_key:
         return []
     downloaded = []
-    # Sadece gerçek keyword'ler — generic fallback sorgular kaldırıldı
-    queries = keywords[:4]
+    queries = _stock_queries(keywords, n=6)
     if not queries:
         return []
     random.shuffle(queries)

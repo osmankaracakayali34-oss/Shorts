@@ -146,15 +146,13 @@ def run(dry_run: bool = False, hz_override: float = None) -> None:
         print(f"[freq_main] Başlık: {script['title']}")
         print(f"[freq_main] Hook: {script['hook_line']}")
 
-        # 2.5) Çoklu dil çevirileri üret (başarısız olursa pipeline durur)
+        # 2.5) Çoklu dil çevirileri üret — başarısız olursa video lokalizasyonsuz yüklenir
         print("\n[freq_main] Çoklu dil çevirileri üretiliyor...")
-        localizations = _step(
-            "Localization çevirisi",
-            lambda: generate_localizations(script),
-            topic["name"],
-        )
-        if not localizations:
-            raise RuntimeError("Localization üretilemedi — video yayınlanmayacak.")
+        try:
+            localizations = generate_localizations(script)
+        except Exception as _loc_err:
+            print(f"[freq_main] Localization üretilemedi (kritik değil): {_loc_err}")
+            localizations = None
 
         # 3) Frekans sesi üret
         print(f"\n[freq_main] {topic['hz']} Hz ses üretiliyor...")
@@ -196,7 +194,7 @@ def run(dry_run: bool = False, hz_override: float = None) -> None:
     base_tags = [
         "Neuro-Frequency", "Neural Frequency", "Healing Frequency", "Meditation Music",
         "Binaural Beats", "Solfeggio Frequencies", "Nervous System", "Brain Waves",
-        "Sound Therapy", "Shorts",
+        "Sound Therapy", "ADHD", "ADHD Focus", "Shorts",
     ]
     upload_tags = list(dict.fromkeys(script["tags"] + base_tags))
 

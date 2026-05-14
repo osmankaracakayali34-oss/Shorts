@@ -99,7 +99,7 @@ def upload_video(
     video_id = response["id"]
     print(f"[uploader] Video yüklendi: https://youtube.com/shorts/{video_id}")
 
-    # Localization (çoklu dil başlık/açıklama) ekle
+    # Localization (çoklu dil başlık/açıklama) ekle — kritik değil, başarısız olsa video kalır
     if localizations:
         print(f"[uploader] Localization ekleniyor ({len(localizations)} dil)...")
         try:
@@ -112,13 +112,7 @@ def upload_video(
             ).execute()
             print("[uploader] Localization eklendi.")
         except Exception as e:
-            print(f"[uploader] Localization başarısız — video siliniyor: {e}")
-            try:
-                youtube.videos().delete(id=video_id).execute()
-                print(f"[uploader] Video silindi: {video_id}")
-            except Exception as del_err:
-                print(f"[uploader] Video silinemedi: {del_err}")
-            raise RuntimeError(f"Localization eklenemedi, video silindi: {e}")
+            print(f"[uploader] Localization başarısız (kritik değil, video korunuyor): {e}")
 
     # Thumbnail yükle
     if thumbnail_path and os.path.exists(thumbnail_path):

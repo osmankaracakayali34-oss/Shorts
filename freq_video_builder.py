@@ -399,6 +399,50 @@ def _make_cta_overlay(cta_line: str, palette: dict, duration: float) -> ImageCli
     return ImageClip(arr, ismask=False).set_duration(duration)
 
 
+SOUND_WARNING_DURATION = 4.0
+
+
+def _make_sound_warning_overlay(palette: dict, duration: float = SOUND_WARNING_DURATION) -> ImageClip:
+    """'TURN SOUND ON' pill uyarısı — ilk N saniyede ekranda görünür."""
+    img = Image.new("RGBA", (TARGET_W, TARGET_H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    accent = palette["accent"]
+
+    text = "TURN SOUND ON"
+    font = _load_font(46)
+
+    try:
+        tw = draw.textlength(text, font=font)
+    except AttributeError:
+        bbox = font.getbbox(text)
+        tw = bbox[2] - bbox[0]
+
+    pad_x, pad_y = 52, 22
+    box_w = int(tw) + pad_x * 2
+    box_h = 46 + pad_y * 2
+    cx = TARGET_W // 2
+    # Hook altı - Hz kutusu üstü arası boşluk: %62 yüksekliğe yerleştir
+    cy = int(TARGET_H * 0.62)
+    x1 = cx - box_w // 2
+    y1 = cy - box_h // 2
+    x2 = cx + box_w // 2
+    y2 = cy + box_h // 2
+
+    try:
+        draw.rounded_rectangle([(x1, y1), (x2, y2)], radius=box_h // 2, fill=(*accent, 220))
+    except AttributeError:
+        draw.rectangle([(x1, y1), (x2, y2)], fill=(*accent, 220))
+
+    # Koyu metin (accent rengi üstünde)
+    tx = cx - int(tw) // 2
+    ty = y1 + pad_y
+    draw.text((tx + 1, ty + 1), text, font=font, fill=(0, 0, 0, 100))
+    draw.text((tx, ty), text, font=font, fill=(10, 10, 10, 245))
+
+    arr = np.array(img)
+    return ImageClip(arr, ismask=False).set_duration(duration)
+
+
 # ─── Ana video builder ────────────────────────────────────────────────────────
 
 def build_freq_video(script: dict, audio_path: str, output_path: str = OUTPUT_PATH) -> str:
@@ -498,10 +542,14 @@ def build_freq_video(script: dict, audio_path: str, output_path: str = OUTPUT_PA
     print("[freq_video] Frekans overlay oluşturuluyor...")
     freq_overlay = _make_freq_overlay(hz, freq_name, short_benefit, palette).set_duration(total_duration)
 
-    # ─── Birleştir: footage + hook + hz ──────────────────────────────────────
+    # 3) Ses uyarısı — ilk SOUND_WARNING_DURATION saniye
+    print("[freq_video] Ses uyarısı overlay oluşturuluyor...")
+    sound_warning = _make_sound_warning_overlay(palette)
+
+    # ─── Birleştir: footage + hook + hz + ses uyarısı ────────────────────────
     print("[freq_video] Katmanlar birleştiriliyor...")
     final_video = CompositeVideoClip(
-        [bg_video, hook_overlay, freq_overlay],
+        [bg_video, hook_overlay, freq_overlay, sound_warning],
         size=(TARGET_W, TARGET_H),
     ).set_duration(total_duration)
     final_video = final_video.set_audio(audio_clip.subclip(0, total_duration))

@@ -119,6 +119,7 @@ Format: "[Hz] Hz [emoji] Neuro-[Action] – [Outcome 1] & [Outcome 2] | Meditati
   GOOD: "Purge Cortisol & Reset Emotional Balance", "Flush Anxiety & Rewire Sleep Patterns", "Boost GABA & Calm the Nervous System"
   BAD: "Relax and Sleep", "Feel Better", "Healing Music"
 - End ALWAYS with "| Meditation Music"
+- For focus / calm / energy / brain / sleep moods, include "ADHD" or "ADHD Focus" in the title (e.g. "… ADHD Focus & Deep Sleep | Meditation Music")
 
 ━━━ HOOK LINE RULES ━━━
 - Shown as large overlay text on screen. ≤12 words.
@@ -161,6 +162,7 @@ End with relevant hashtags on new lines.
 - Specific physiological keywords from the benefit (e.g. "Cortisol Relief", "Nervous System Reset")
 - Brainwave type if applicable (Delta Waves, Theta, Alpha, Gamma, etc.)
 - "Binaural Beats", "Solfeggio Frequencies", "Meditation Music", "Sleep Music" or "Focus Music"
+- ALWAYS include: "ADHD", "ADHD Focus"
 
 Output ONLY valid JSON:
 {{
@@ -233,13 +235,13 @@ RULES:
 Title: {title}
 Description: {description}
 
-Languages: es, fr, pt, de, tr, ar, ja, ko, hi, it, ru, zh
+Languages: es, fr, pt, de, tr, ar, ja, ko, hi, it, ru, zh-Hans
 
 Output ONLY valid JSON with ALL 12 languages:
-{{"es":{{"title":"...","description":"..."}},"fr":{{"title":"...","description":"..."}},"pt":{{"title":"...","description":"..."}},"de":{{"title":"...","description":"..."}},"tr":{{"title":"...","description":"..."}},"ar":{{"title":"...","description":"..."}},"ja":{{"title":"...","description":"..."}},"ko":{{"title":"...","description":"..."}},"hi":{{"title":"...","description":"..."}},"it":{{"title":"...","description":"..."}},"ru":{{"title":"...","description":"..."}},"zh":{{"title":"...","description":"..."}}}}
+{{"es":{{"title":"...","description":"..."}},"fr":{{"title":"...","description":"..."}},"pt":{{"title":"...","description":"..."}},"de":{{"title":"...","description":"..."}},"tr":{{"title":"...","description":"..."}},"ar":{{"title":"...","description":"..."}},"ja":{{"title":"...","description":"..."}},"ko":{{"title":"...","description":"..."}},"hi":{{"title":"...","description":"..."}},"it":{{"title":"...","description":"..."}},"ru":{{"title":"...","description":"..."}},"zh-Hans":{{"title":"...","description":"..."}}}}
 """
 
-TARGET_LANGS = ["es", "fr", "pt", "de", "tr", "ar", "ja", "ko", "hi", "it", "ru", "zh"]
+TARGET_LANGS = ["es", "fr", "pt", "de", "tr", "ar", "ja", "ko", "hi", "it", "ru", "zh-Hans"]
 
 
 def generate_localizations(script: dict) -> dict:
